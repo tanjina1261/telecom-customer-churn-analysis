@@ -1,0 +1,5 @@
+Segment,Customer_Count,Churn_Rate_Percent,Avg_Tenure,Avg_Monthly_Charge
+High-Risk New Customers,1545,58.96,4.6,67.41
+Price-Sensitive At-Risk Customers,1151,43.44,34.0,90.22
+Stable / Moderate-Risk Customers,3671,11.55,37.4,51.64
+Loyal Long-Term Customers,676,5.03,65.8,86.61
