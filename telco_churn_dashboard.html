@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Telecom Customer Churn & Retention Dashboard</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f5f5f4;
+    color: #1a1a1a;
+    margin: 0;
+    padding: 24px;
+  }
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: #6b6b6b;
+    margin-bottom: 24px;
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .kpi-label {
+    font-size: 13px;
+    color: #6b6b6b;
+    margin: 0 0 6px;
+  }
+  .kpi-value {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .kpi-value.danger { color: #d0342c; }
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 20px;
+  }
+  .tab-btn {
+    border: none;
+    background: none;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b6b6b;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+  }
+  .tab-btn.active {
+    color: #1a1a1a;
+    border-bottom: 3px solid #2a78d6;
+  }
+  .chart-section {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .chart-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    margin: 0 0 12px;
+  }
+  .chart-wrap {
+    position: relative;
+    height: 220px;
+  }
+  table {
+    width: 100%;
+    font-size: 13px;
+    border-collapse: collapse;
+    margin-top: 8px;
+  }
+  th, td {
+    padding: 8px 6px;
+    text-align: right;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  th:first-child, td:first-child {
+    text-align: left;
+  }
+  th {
+    color: #6b6b6b;
+    font-weight: 600;
+  }
+  footer {
+    font-size: 12px;
+    color: #9b9b9b;
+    text-align: center;
+    margin-top: 24px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Telecom Customer Churn &amp; Retention Dashboard</h1>
+  <p class="subtitle">Based on the IBM Telco Customer Churn dataset (7,043 customers)</p>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <p class="kpi-label">Total customers</p>
+      <p class="kpi-value">7,043</p>
+    </div>
+    <div class="kpi-card">
+      <p class="kpi-label">Overall churn rate</p>
+      <p class="kpi-value danger">26.5%</p>
+    </div>
+    <div class="kpi-card">
+      <p class="kpi-label">Churned customers</p>
+      <p class="kpi-value">1,869</p>
+    </div>
+    <div class="kpi-card">
+      <p class="kpi-label">Highest-risk segment</p>
+      <p class="kpi-value danger" style="font-size:16px;">High-Risk New (59%)</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="drivers">Churn Drivers</button>
+    <button class="tab-btn" data-tab="segments">Customer Segments</button>
+  </div>
+
+  <div id="panel-drivers">
+    <div class="chart-section">
+      <p class="chart-title">Churn rate by contract type</p>
+      <div class="chart-wrap"><canvas id="chartContract"></canvas></div>
+    </div>
+    <div class="chart-section">
+      <p class="chart-title">Churn rate by tenure</p>
+      <div class="chart-wrap"><canvas id="chartTenure"></canvas></div>
+    </div>
+    <div class="chart-section">
+      <p class="chart-title">Churn rate by monthly charges</p>
+      <div class="chart-wrap"><canvas id="chartCharges"></canvas></div>
+    </div>
+    <div class="chart-section">
+      <p class="chart-title">Churn rate: with vs without support services</p>
+      <div class="chart-wrap"><canvas id="chartSupport"></canvas></div>
+    </div>
+    <div class="chart-section">
+      <p class="chart-title">Churn rate by payment method</p>
+      <div class="chart-wrap" style="height:240px;"><canvas id="chartPayment"></canvas></div>
+    </div>
+  </div>
+
+  <div id="panel-segments" style="display:none;">
+    <div class="chart-section">
+      <p class="chart-title">Customer count by segment</p>
+      <div class="chart-wrap"><canvas id="chartSegCount"></canvas></div>
+    </div>
+    <div class="chart-section">
+      <p class="chart-title">Churn rate by segment</p>
+      <div class="chart-wrap"><canvas id="chartSegChurn"></canvas></div>
+    </div>
+    <div class="chart-section">
+      <p class="chart-title">Segment profile</p>
+      <table>
+        <tr><th>Segment</th><th>Customers</th><th>Churn rate</th><th>Avg tenure</th><th>Avg monthly charge</th></tr>
+        <tr><td>High-Risk New Customers</td><td>1,545</td><td>58.96%</td><td>4.6 mo</td><td>$67.41</td></tr>
+        <tr><td>Price-Sensitive At-Risk</td><td>1,151</td><td>43.44%</td><td>34.0 mo</td><td>$90.22</td></tr>
+        <tr><td>Stable / Moderate-Risk</td><td>3,671</td><td>11.55%</td><td>37.4 mo</td><td>$51.64</td></tr>
+        <tr><td>Loyal Long-Term</td><td>676</td><td>5.03%</td><td>65.8 mo</td><td>$86.61</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <footer>Telecom Customer Insights &amp; Retention Analysis — data cleaning, analysis, and dashboard by Tanjina Faria</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const blue = '#2a78d6';
+const red = '#d0342c';
+const grid = 'rgba(0,0,0,0.06)';
+const tick = '#6b6b6b';
+
+const baseOpts = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: { callbacks: { label: (ctx) => (ctx.dataset.label ? ctx.dataset.label + ': ' : '') + ctx.parsed.y + '%' } }
+  },
+  scales: {
+    y: { beginAtZero: true, max: 60, ticks: { color: tick, callback: (v) => v + '%' }, grid: { color: grid } },
+    x: { ticks: { color: tick }, grid: { display: false } }
+  }
+};
+
+new Chart(document.getElementById('chartContract'), {
+  type: 'bar',
+  data: { labels: ['Month-to-month', 'One year', 'Two year'], datasets: [{ data: [42.71, 11.27, 2.83], backgroundColor: blue, borderRadius: 4 }] },
+  options: baseOpts
+});
+
+new Chart(document.getElementById('chartTenure'), {
+  type: 'bar',
+  data: { labels: ['0-12 mo', '13-24 mo', '25-48 mo', '49-72 mo'], datasets: [{ data: [47.68, 28.71, 20.39, 9.51], backgroundColor: blue, borderRadius: 4 }] },
+  options: baseOpts
+});
+
+new Chart(document.getElementById('chartCharges'), {
+  type: 'bar',
+  data: { labels: ['Low ($0-35)', 'Medium ($35-70)', 'High ($70-90)', 'Very High ($90+)'], datasets: [{ data: [10.89, 23.94, 37.8, 32.78], backgroundColor: blue, borderRadius: 4 }] },
+  options: baseOpts
+});
+
+new Chart(document.getElementById('chartSupport'), {
+  type: 'bar',
+  data: {
+    labels: ['Tech support', 'Online security'],
+    datasets: [
+      { label: 'No', data: [41.64, 41.77], backgroundColor: red, borderRadius: 4 },
+      { label: 'Yes', data: [15.17, 14.61], backgroundColor: blue, borderRadius: 4 }
+    ]
+  },
+  options: {
+    ...baseOpts,
+    plugins: {
+      legend: { display: true, position: 'top', labels: { color: tick, boxWidth: 12, font: { size: 12 } } },
+      tooltip: baseOpts.plugins.tooltip
+    }
+  }
+});
+
+new Chart(document.getElementById('chartPayment'), {
+  type: 'bar',
+  data: { labels: ['Electronic check', 'Mailed check', 'Bank transfer', 'Credit card'], datasets: [{ data: [45.29, 19.11, 16.71, 15.24], backgroundColor: blue, borderRadius: 4 }] },
+  options: {
+    ...baseOpts,
+    indexAxis: 'y',
+    scales: {
+      x: { beginAtZero: true, max: 60, ticks: { color: tick, callback: (v) => v + '%' }, grid: { color: grid } },
+      y: { ticks: { color: tick }, grid: { display: false } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chartSegCount'), {
+  type: 'bar',
+  data: { labels: ['High-Risk New', 'Price-Sensitive At-Risk', 'Stable', 'Loyal Long-Term'], datasets: [{ data: [1545, 1151, 3671, 676], backgroundColor: blue, borderRadius: 4 }] },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, ticks: { color: tick }, grid: { color: grid } }, x: { ticks: { color: tick }, grid: { display: false } } }
+  }
+});
+
+new Chart(document.getElementById('chartSegChurn'), {
+  type: 'bar',
+  data: { labels: ['High-Risk New', 'Price-Sensitive At-Risk', 'Stable', 'Loyal Long-Term'], datasets: [{ data: [58.96, 43.44, 11.55, 5.03], backgroundColor: red, borderRadius: 4 }] },
+  options: baseOpts
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    document.getElementById('panel-drivers').style.display = tab === 'drivers' ? 'block' : 'none';
+    document.getElementById('panel-segments').style.display = tab === 'segments' ? 'block' : 'none';
+  });
+});
+</script>
+</body>
+</html>
